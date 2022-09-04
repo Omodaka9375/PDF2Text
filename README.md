@@ -51,5 +51,5 @@ This tool is based on PDF2Img tool by OpenToolKit
 
 ## License
 
-[GPL v3.0](/LICENCE)
+[GPL v3.0](/LICENsE)
 
