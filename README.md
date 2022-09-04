@@ -12,16 +12,7 @@ This is a single page static website that will convert your PDF to text using Te
 - No tracking & No ads
 - Instant conversion to text file
 
-![Demo](/demo.png "Demo screenshot")
-
-
-
-
-## Authors
-
-- [@Omodaka9375](https://github.com/OpenToolKit/Pdf2Img)
-- [@OpenToolKit](https://github.com/OpenToolKit/Pdf2Img)
-
+![PDF2Text screenshot](/demo.png "Demo screenshot")
 
 ## Run Locally
 
