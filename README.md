@@ -1,6 +1,6 @@
 # PDF2Text
 
-This is a single page static website that will convert your PDF to text using Tesseract OCR (v4) in your browser, and download extraction as .txt file.
+This is a single page static website that will convert your PDF to text using Tesseract OCR (v4) in your browser, and download extraction as .txt file
 
 
 ## Features
@@ -51,5 +51,5 @@ This tool is based on PDF2Img tool by OpenToolKit
 
 ## License
 
-[GPL v3.0](LICENCE)
+[GPL v3.0](/LICENCE)
 
