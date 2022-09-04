@@ -28,7 +28,7 @@ Go to the project directory
   cd PDF2Text
 ```
 
-Start the server
+Start the server localy
 
 ```bash
   http-server (or VSCode live server option)
