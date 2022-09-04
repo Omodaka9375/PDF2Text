@@ -1,4 +1,4 @@
-# PDF2TEXT
+# PDF2Text
 
 This is a single page static website that will convert your PDF to text using Tesseract OCR (v4) in your browser, and download extraction as .txt file.
 
