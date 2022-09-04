@@ -15,14 +15,6 @@ This is a single page static website that will convert your PDF to text using Te
 ![Demo](/demo.png "Demo screenshot")
 
 
-
-
-## Authors
-
-- [@Omodaka9375](https://github.com/OpenToolKit/Pdf2Img)
-- [@OpenToolKit](https://github.com/OpenToolKit/Pdf2Img)
-
-
 ## Run Locally
 
 Clone the project
