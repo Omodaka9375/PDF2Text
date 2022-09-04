@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Pdf2Text - Convert Pdf to Text in your browser!</title>
+  <meta name="description"
+    content="Free, In-browser, Privacy friendly PDF to text convertor. Supports JPG/JPEG,PNG Image file formats. Your files doesn't leave your browser.">
+  <link rel="shortcut icon" type="image/x-icon" href="pdf2text-favicon.ico">
+  <link rel="icon" type="image/x-icon" href="pdf2img-favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@200&display=swap" rel="stylesheet">
+  <script src="js/pdf.min-2.5.207.js"></script>
+  <script src="js/jszip.min-3.5.0.js"></script>
+  <script src="js/FileSaver.min-3.5.0.js"></script>
+  <script src="js/tesseract.min.js"></script>
+</head>
+
+<body>
+  <div id="home_grid">
+    <div id="params_div_container" class="home_grid_item">
+      <div id="params_div">
+        <div style="text-align: center;">
+          <h1 id="title">PDF to Text</h1>
+          <h4 id="caption">Extract text from PDF 📜 with Tesseract OCR ✨</h4>
+        </div>
+        <div style="text-align: center;">
+          <img style="width: 35%;margin: 1vmax;" alt="logo" src="placeholder/hero.svg">
+        </div>
+        <div id="pdf_params_divs_container">
+          <div class="pdf_params_divs">
+            <label for="pdf_input">Input file: </label>
+            <button id="pdf_input_overlay">Select PDF</button>
+            <input id="pdf_input" type="file" accept="application/pdf" style="display:none;">
+            <output style="font-size: x-small;" id="selected_file_name" for="pdf_input_overlay"></output>
+          </div>
+          <div class="pdf_params_divs">
+            <label for="format_select">Output image format: </label>
+            <select id="format_select">
+              <option value="image/png" selected>PNG</option>
+              <option value="image/jpeg">JPEG</option>
+            </select>
+          </div>
+          <div class="pdf_params_divs">
+            <label for="scale_input">PDF page scale factor: </label>
+            <input class="text_input" id="scale_input" type="range" min="0.5" max="15" value="2" step="0.5">
+            <output style="font-size: small;" id="output_scale_input" for="scale_input">2</output>
+          </div>
+          <div class="pdf_params_divs">
+            <label for="quality_input">Output image quality multiplier: </label>
+            <input class="text_input" id="quality_input" type="range" min="0" max="1" value="1" step="0.1">
+            <output style="font-size: small;" id="output_quality_input" for="quality_input">1</output>
+          </div>
+          <div style="text-align: center;">
+            <button id="convert_pdf">Convert to Text</button>
+          </div>
+        </div>
+        <div id="question">
+          <button id="bttn_open"><img src="question-info-icon.png" width="30" height="30"></button>
+        </div>
+      </div>
+
+      <div id="acrylic_container">
+        <div id="log">
+          <li style="list-style: none; font-family: Consolas,SFMono-Regular,Liberation Mono,Menlo,monospace">
+            [Conversion log]
+          </li>
+        </div>
+      </div>
+    </div>
+
+    <div class="home_grid_item">
+      <div id="flex_layout">
+        <div id="pdf_preview_container">
+          <iframe id="pdf_preview" src="placeholder/preview.pdf#toolbar=0"> </iframe>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div style="max-width: 0px;max-height: 0px;overflow: hidden;">
+    <canvas id="page_canvas" style="border: 0px solid black; direction: ltr;"></canvas>
+  </div>
+  <div id="footer" style="text-align: center; color: white; font-size:medium; ">
+    <a href="https://github.com/Omodaka9375?tab=repositories" target="_blank" style="color: white;">@Omodaka9375</a>
+  </div>
+  <div id="about">
+    <h3>About</h3>
+    <p>This is a single page static website that will convert your PDF to text using Tesseract OCR (v4) in your browser,
+      and download extraction as .txt file. </p>
+    <p>Works only in <bold>Chrome browser</bold>!!</p>
+    <p>You can set the type of image (PNG or JPEG) as well as the scale and quality (to improve OCR result).</p>
+    <p>Conversion log is there so you can track progress.</p>
+    <p>- Works within your Chrome browser 🌐</p>
+    <p>- Data stays on your PC, Nothing is uploaded 📤❌</p>
+    <p>- No tracking & No ads 🚫</p>
+    <p>- Instant conversion as text file ⚡</p>
+    <p>Code: <a href="https://github.com/Omodaka9375/PDF2Text" target="_blank">Github</a></p>
+    <div id="button_div">
+      <button id="close_popup">Close</button>
+    </div>
+
+  </div>
+  <style>
+    #question {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+    }
+
+    #bttn_open {
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      background: none;
+      outline: none;
+      border: none;
+    }
+
+    #bttn_open:hover {
+      background: none;
+      outline: none;
+      border: none;
+      cursor: pointer;
+      box-shadow: none !important;
+      transform: none !important;
+    }
+
+    #about {
+      position: absolute;
+      display: none;
+      width: 500px;
+      height: 475px;
+      top: 45%;
+      left: 50%;
+      margin-top: -230px;
+      background-color: rgb(211, 211, 211);
+      border-radius: 10px;
+      margin-left: -250px;
+      padding: 15px;
+      font-family: Raleway, 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+      font-style: normal;
+      font-weight: 200;
+      color: black;
+    }
+
+    #close_popup {
+      padding: 10px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    #button_div {
+      text-align: center;
+      margin-bottom: 10px;
+
+    }
+
+    body {
+      background-color: #33333d;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%231eb980' fill-opacity='0.28'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      margin-right: 2vw;
+      margin-left: 2vw;
+      margin-top: 1.5vh;
+    }
+
+    #title {
+      font-family: Raleway, 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+      font-style: normal;
+      font-weight: 300;
+      font-size: 2.5em;
+      color: cornsilk;
+      margin: 5vh 0 0 0;
+      padding-bottom: 10px;
+    }
+
+    #caption {
+      font-family: Raleway, 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+      font-style: normal;
+      font-weight: 200;
+      color: cornsilk;
+      margin: 0 0 2vh 0;
+    }
+
+    #home_grid {
+      display: grid;
+      grid-column-gap: 25px;
+      grid-row-gap: 10px;
+      grid-template-rows: auto;
+      grid-template-columns: repeat(auto-fit, minmax(345px, 1fr));
+      padding: 10px;
+    }
+
+    #params_div_container {
+      background-color: #a61f5e;
+      background-attachment: fixed;
+      background-size: cover;
+      border-radius: 10px;
+    }
+
+    #params_div {
+      backdrop-filter: blur(5px) saturate(125%);
+      background: rgba(0, 0, 0, 0.1);
+      max-width: 100%;
+      height: 50%;
+
+      border-radius: 10px;
+      padding: 5px;
+      color: cornsilk;
+      font-family: Raleway, Verdana, Geneva, Tahoma, sans-serif;
+      position: relative;
+      overflow: auto;
+    }
+
+    #params_div::-webkit-scrollbar {
+      width: 0 !important
+    }
+
+    #params_div {
+      scrollbar-width: none;
+    }
+
+    .pdf_params_divs {
+      margin-bottom: 10px;
+    }
+
+    label {
+      font-size: small;
+      font-weight: normal;
+      font-family: Raleway, Verdana, Geneva, Tahoma, sans-serif;
+    }
+
+    #format_select {
+      margin: 0px 5px;
+      background: rgb(51, 51, 61);
+      color: cornsilk;
+      padding: 5px;
+      outline: none;
+      font-weight: normal;
+      font-family: Raleway, Verdana, Geneva, Tahoma, sans-serif;
+    }
+
+    button {
+      background: rgb(51, 51, 61);
+      font-family: Raleway, Verdana, Geneva, Tahoma, sans-serif;
+      color: cornsilk;
+      font-size: x-small;
+      border: 2px solid rgba(51, 51, 61, 0.1);
+      outline: none;
+    }
+
+    button:hover {
+      box-shadow: 0px 5px 20px 5px rgb(51, 51, 61);
+      transform: translateY(-2px);
+    }
+
+    #pdf_input_overlay {
+      border-radius: 20px;
+      padding: 5px 15px;
+      margin: 0px 5px;
+      font-size: 12px;
+    }
+
+    #convert_pdf {
+      font-size: 14px;
+      padding: 5px 15px;
+      margin: 5px 0px;
+      border-radius: 25px;
+    }
+
+    #mark_pdf {
+      font-size: small;
+      padding: 5px 15px;
+      margin: 5px 0px;
+      border-radius: 25px;
+    }
+
+    .text_input {
+      vertical-align: middle;
+    }
+
+    select {
+      border-radius: 15px;
+      border: 2px solid rgba(51, 51, 61, 0.1);
+    }
+
+    #params_div {
+      height: auto;
+    }
+
+    #pdf_params_divs_container {
+      width: 75%;
+      margin: 10px auto;
+    }
+
+    #flex_layout {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      flex-wrap: nowrap;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    #pdf_preview_container {
+      margin-bottom: 3px;
+      padding: 3px;
+      height: 100%;
+    }
+
+    #pdf_preview {
+      height: 100%;
+
+      width: 100%;
+      border-radius: 10px;
+      border: 3px dashed rgb(255, 255, 255);
+    }
+
+    #acrylic_container {
+      border-radius: 10px;
+      background-attachment: fixed;
+      background-size: cover;
+      border: 4px solid rgb(255, 255, 255);
+    }
+
+    #log {
+      height: 40vh;
+      max-height: 40vh;
+      overflow: auto;
+      background: rgba(0, 0, 0, 1.0);
+      backdrop-filter: blur(5px) saturate(125%);
+      color: cornsilk;
+      border-radius: 8px;
+    }
+  </style>
+
+  <script>
+    const log = document.getElementById('log');
+
+    function addLogEntry(message, prompt = '-> ') {
+      var entry = document.createElement('li');
+      entry.style = "list-style: none; font-family: Consolas,SFMono-Regular,Liberation Mono,Menlo,monospace";
+      entry.textContent = prompt + message;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function clearLog() {
+      log.textContent = '';
+      addLogEntry("[Conversion log]", '');
+    }
+
+    function combLog(val) {
+      addLogEntry(val);
+      rlog(val)
+    }
+
+    const rlog = console.log;
+    console.log = combLog;
+
+    var input_scale = 2,
+      input_quality = 1,
+      input_format = 'image/png';
+
+    var scale_input = document.getElementById('scale_input');
+    scale_input.addEventListener('input', onScaleInput);
+
+    function onScaleInput() {
+      input_scale = Number(this.value);
+      var output_scale = document.getElementById('output_scale_input');
+      output_scale.value = input_scale;
+    }
+
+    var quality_input = document.getElementById('quality_input');
+    quality_input.addEventListener('input', onQualityInput);
+
+    function onQualityInput() {
+      input_quality = Number(this.value);
+      var output_quality = document.getElementById('output_quality_input');
+      output_quality.value = input_quality;
+    }
+
+    var format_select = document.getElementById('format_select');
+    format_select.addEventListener('change', onFormatSelect);
+
+    function onFormatSelect() {
+      input_format = this.value;
+    }
+
+    var convert_pdf = document.getElementById('convert_pdf');
+    convert_pdf.addEventListener('click', onProcessInputPDF);
+
+    var close_popup = document.getElementById('close_popup');
+    close_popup.addEventListener('click', onClosePopup);
+
+    var bttn_open = document.getElementById('bttn_open');
+    bttn_open.addEventListener('click', openPopup);
+
+    function toggleStates(enable) {
+      disabled = !enable;
+      input_pdf.disabled = disabled;
+      format_select.disabled = disabled;
+      quality_input.disabled = disabled;
+      scale_input.disabled = disabled;
+      convert_pdf.disabled = disabled;
+    }
+
+    function updatePreview(url) {
+      document.getElementById('pdf_preview').src = url + '#toolbar=0';
+    }
+
+    function resetPreview() {
+      document.getElementById('pdf_preview').src = 'placeholder/preview.pdf' + '#toolbar=0';
+    }
+
+    var input_pdf = document.getElementById('pdf_input');
+    input_pdf.addEventListener('input', onInputPDF);
+
+    var input_pdf_overlay = document.getElementById('pdf_input_overlay');
+    input_pdf_overlay.addEventListener('click', () => { input_pdf.click() });
+
+    function onClosePopup() {
+      document.getElementById("about").style.display = "none";
+    }
+
+    function openPopup() {
+      document.getElementById("about").style.display = "block";
+    }
+
+    function onInputPDF() {
+
+      var file = this.files[0];
+
+      if (!file) {
+        return;
+      }
+
+      clearLog();
+
+      var selected_file_name = document.getElementById('selected_file_name');
+
+      if (file.type != 'application/pdf') {
+        pdfName = null;
+        pdfFileObject = null;
+        console.log(file.name + " - Unsupported file format, Select a PDF file!");
+        selected_file_name.value = file.name + " - Unsupported file format!";
+        resetPreview();
+        return;
+      }
+
+      var fileURL = URL.createObjectURL(file);
+      updatePreview(fileURL);
+
+      pdfName = file['name'];
+      pdfFileObject = file;
+      selected_file_name.value = pdfName;
+    }
+
+    function onProcessInputPDF() {
+
+      if (!pdfFileObject) {
+        return;
+      }
+
+      toggleStates(false);
+      clearLog();
+
+      console.log("Loading selected file...");
+
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        var url = e.target.result;
+        pdf2img(url);
+      }
+      if (pdfFileObject) {
+        reader.readAsDataURL(pdfFileObject);
+      } else {
+        console.log("Error reading file... Choose file again...");
+        toggleStates(true);
+      }
+    }
+
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/pdf.worker.min-2.5.207.js';
+
+    var pdfDoc = null,
+      pageNum = 1,
+      pdfFileObject = null,
+      pageRendering = false,
+      pageCount = 0,
+      pageNumPending = null,
+      pageScale = input_scale,
+      pageQuality = input_quality,
+      pageFormat = input_format,
+      imgData = null,
+      pdfName = "doc";
+
+    var canvas = document.getElementById('page_canvas');
+    var ctx = canvas.getContext('2d');
+
+    function pdf2img(pdf_url) {
+      readPDF(pdf_url)
+        .then(() => downloadAll(),
+          () => {
+            console.log("Error reading PDF... May be an encrypted one [-_^]");
+            toggleStates(true);
+          });
+    }
+
+
+    function readPDF(url) {
+      return new Promise((resolve, reject) => {
+        var selected_file_name = document.getElementById('selected_file_name');
+        var loadingTask = pdfjsLib.getDocument(url);
+        loadingTask.promise.then(function (pdfDoc_) {
+          pdfDoc = pdfDoc_;
+          resetPDFMetaStore(pdfDoc.numPages);
+          console.log("PDF Loaded: " + pdfName);
+          selected_file_name.value += ' - ' + pageCount + ' Pages';
+          resolve(1);
+        },
+          () => reject(1));
+      });
+    }
+
+    function resetPDFMetaStore(numPages) {
+      pageCount = numPages;
+      imgData = {};
+      pageNumPending = [];
+      pageScale = input_scale;
+      pageQuality = input_quality;
+      pageFormat = input_format;
+    }
+
+    /**
+     * Get page info from document, resize canvas accordingly, and render page.
+     * @param num Page number.
+     */
+    function renderPage(num) {
+      pageRendering = true;
+      // Using promise to fetch the page
+      pdfDoc.getPage(num).then(function (page) {
+        var viewport = page.getViewport({ scale: pageScale, });
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        // Render PDF page into canvas context
+        var renderContext = {
+          canvasContext: ctx,
+          viewport: viewport,
+        };
+        var renderTask = page.render(renderContext);
+        // Wait for rendering to finish
+        renderTask.promise.then(function () {
+
+          canvas.toBlob(function (blob) {
+            imgData[num] = blob;
+            console.log("Completed page: " + num);
+            pageRendering = false;
+
+            if (pageNumPending !== null && pageNumPending.length != 0) {
+              // New page rendering is pending
+              renderPage(pageNumPending.shift());
+
+            } else {
+              if (Object.keys(imgData).length == pageCount) {
+                console.log("Rendering complete");
+                ocrImageData();
+                //processImageData();
+              }
+            }
+          }, pageFormat, pageQuality);
+        });
+      });
+      console.log("Processing page: " + num);
+    }
+    /**
+     * If another page rendering in progress, waits until the rendering is
+     * finised. Otherwise, executes rendering immediately.
+     */
+    function queueRenderPage(num) {
+      if (pageRendering) {
+        pageNumPending.push(num);
+      } else {
+        renderPage(num);
+      }
+    }
+
+    function downloadAll() {
+      for (i = 1; i <= pageCount; i++) {
+        queueRenderPage(i)
+      }
+    }
+
+    function processImageData() {
+      console.log("Creating Zip...");
+      var zip = new JSZip();
+      var pages = zip.folder(pdfName);
+
+      for (i = 1; i <= pageCount; i++) {
+        var page = imgData[i];
+        var ext = page.type.replace("image/", ".");
+        var pdfNameNoExt = pdfName.slice(0, -4);
+        pages.file(pdfNameNoExt + "_page_" + i + ext, page);
+      }
+
+      zip.generateAsync({ type: "blob" }).then(function (content) {
+        console.log("Downloading Zip...");
+        saveAs(content, pdfName + ".zip");
+        console.log(pdfName + ".zip" + "- Download Complete [-_-]");
+        toggleStates(true);
+      });
+    }
+
+    async function ocrImageData() {
+      console.log("Extracting text...");
+
+      const worker = Tesseract.createWorker({
+        // logger: m => console.log(JSON.stringify(m)),
+        // langPath: 'lang'
+      });
+
+      await worker.load();
+      await worker.loadLanguage('eng');
+      await worker.initialize('eng');
+
+      console.log("Doing OCR...");
+
+      let allPages = [];
+
+      for (i = 1; i <= pageCount; i++) {
+        const img = await imgData[i].arrayBuffer();
+        let result = await worker.recognize(img, { endings: "native" });
+        console.log("OCR Result:\nPage(" + i + ")\n" + result.data.text);
+        allPages.push(result.data.text);
+      }
+
+      let blob = new Blob(allPages, { type: "text/plain;charset=utf-8" });
+      saveAs(blob, pdfName + ".txt");
+      await worker.terminate();
+    }
+  </script>
+</body>
+
+</html>
