@@ -14,6 +14,8 @@ This is a single page static website that will convert your PDF to text using Te
 
 ![PDF2Text screenshot](/demo.png "Demo screenshot")
 
+[Demo](https://omodaka9375.github.io/PDF2Text/)
+
 ## Run Locally
 
 Clone the project
